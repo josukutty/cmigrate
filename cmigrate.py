@@ -11,96 +11,86 @@ def find_runtime():
     for proc in psutil.process_iter():
         if "tomcat" in proc.as_dict().values():
             app_runtimes.append("tomcat")
-        elif "httpd" in proc.as_dict().values():
-            app_runtimes.append("httpd")
         elif "jboss" in str(proc.as_dict().values()):
             app_runtimes.append("jboss")
     
     return list(set(app_runtimes))
 
 
-def get_artefacts(app_runtime):
+def get_artifacts(app_runtime):
     """Get application related environment variable and configurations"""
-    artefact = dict()
+    artifact = dict()
 
     if app_runtime == 'tomcat':
         for proc in psutil.process_iter():
             if "tomcat" in proc.as_dict().values():
                 break
-        artefact['APP_RUNTIME'] = app_runtime
+        artifact['APP_RUNTIME'] = app_runtime
         war_files = glob(proc.environ()['CATALINA_BASE'] + '/webapps/*.war')
-        artefact['APP_DIR'] = war_files
-        artefact['APP_CONFIG'] = proc.environ()['CATALINA_BASE'] + '/conf/tomcat-users.xml'
+        artifact['APP_DIR'] = war_files
+        artifact['APP_CONFIG'] = proc.environ()['CATALINA_BASE'] + '/conf/tomcat-users.xml'
         for conn in proc.connections():
             if conn.laddr.port == 8005:
                 continue
             else:
-                artefact['APP_PORT'] = conn.laddr.port
+                artifact['APP_PORT'] = conn.laddr.port
         # jboss
         if app_runtime=='jboss':
             for proc in psutil.process_iter():
                 if "jboss" in str(proc.as_dict().values()):
                     break
-            artefact['APP_RUNTIME'] = app_runtime
+            artifact['APP_RUNTIME'] = app_runtime
             war_files = glob(proc.environ()['JBOSS_HOME'] + 'standalone/deployments/*.war')
-            artefact['APP_DIR'] = war_files
-            artefact['APP_CONFIG'] = proc.environ()['JBOSS_HOME'] + '/bin/standalone/configuration/standalone.xml'
+            artifact['APP_DIR'] = war_files
+            artifact['APP_CONFIG'] = proc.environ()['JBOSS_HOME'] + '/bin/standalone/configuration/standalone.xml'
             for conn in proc.connections():
                 if conn.laddr.port == 8080:
                     continue
                 else:
-                    artefact['APP_PORT'] = conn.laddr.port
+                    artifact['APP_PORT'] = conn.laddr.port
 
-    if app_runtime == 'httpd':
-        for proc in psutil.process_iter():
-            if "httpd" in proc.as_dict().values():
-                break
-        # artefact['APP_RUNTIME'] = app_runtime
-        #TODO: find config file and undertand the web dir, then copy both to artfact folder
-        # html_files = glob(proc.environ()['CATALINA_BASE'] + '/webapps/*.war')
-        print("Work in progress")
-    return artefact
+    return artifact
 
-def generate_docker_file(artefacts):
+def generate_docker_file(artifacts):
     templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
     templateEnv = jinja2.Environment(loader=templateLoader)
-    if artefacts['APP_RUNTIME'] == "tomcat":
+    if artifacts['APP_RUNTIME'] == "tomcat":
         TEMPLATE_FILE = "Dockerfile-tomcat.j2"
-    elif artefacts['APP_RUNTIME'] == "jboss":
+    elif artifacts['APP_RUNTIME'] == "jboss":
         TEMPLATE_FILE = "Dockerfile-jboss.j2"
-    # elif artefacts['APP_RUNTIME'] == "httpd":
+    # elif artifacts['APP_RUNTIME'] == "httpd":
     #     TEMPLATE_FILE = "Dockerfile-httpd.j2"
     template = templateEnv.get_template(TEMPLATE_FILE)
-    output_dir = './artefact'
+    output_dir = './artifact'
     isExist = os.path.exists(output_dir)
     if not isExist:
         os.makedirs(output_dir)
-    artefact_paths = []
-    for artefact in artefacts['APP_DIR']:
-        dst = output_dir+'/'+artefact.split('/')[-1]
-        shutil.copyfile(artefact, dst)
-        artefact_paths.append(dst)
-    dst = output_dir+'/'+artefacts['APP_CONFIG'].split('/')[-1]
-    shutil.copyfile(artefacts['APP_CONFIG'], dst)
-    artefacts['APP_CONFIG'] = dst
-    artefacts['APP_DIR'] = artefact_paths
-    outputText = template.render(artefacts=artefacts)
+    artifact_paths = []
+    for artifact in artifacts['APP_DIR']:
+        dst = output_dir+'/'+artifact.split('/')[-1]
+        shutil.copyfile(artifact, dst)
+        artifact_paths.append(dst)
+    dst = output_dir+'/'+artifacts['APP_CONFIG'].split('/')[-1]
+    shutil.copyfile(artifacts['APP_CONFIG'], dst)
+    artifacts['APP_CONFIG'] = dst
+    artifacts['APP_DIR'] = artifact_paths
+    outputText = template.render(artifacts=artifacts)
     return outputText
 
 @click.command()
 @click.option('--runtime', default='empty', help='Application runtime, example: tomcat')
 def build_dockerfile(runtime):
-    artefacts = dict()
+    artifacts = dict()
     app_runtime = []
     if runtime == 'empty':
         app_runtime = find_runtime()
         if len(app_runtime) == 1:
-            artefacts = get_artefacts(app_runtime[0])
+            artifacts = get_artifacts(app_runtime[0])
     else:
-        artefacts = get_artefacts(runtime)
-    if len(artefacts.keys()) > 0:
-        print(artefacts)
-        dockerfile = generate_docker_file(artefacts)
+        artifacts = get_artifacts(runtime)
+    if len(artifacts.keys()) > 0:
+        print(artifacts)
+        dockerfile = generate_docker_file(artifacts)
         with open('Dockerfile', 'w') as f:
             f.write(dockerfile)
         print(f"Generated Dockerfile")
