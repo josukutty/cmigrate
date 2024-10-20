@@ -2,6 +2,9 @@ from glob import glob
 import os
 def tomcat_dependencies():
     artifact = {}
+    for proc in psutil.process_iter():
+        if "tomcat" in proc.as_dict().values():
+            break
     artifact['APP_RUNTIME'] = "tomcat"
     war_files = glob(proc.environ()['CATALINA_BASE'] + '/webapps/*.war')
     artifact['APP_DIR'] = war_files
