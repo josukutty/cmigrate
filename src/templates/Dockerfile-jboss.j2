@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/jboss-eap-7/eap71-openshift
-LABEL maintainer="xmigrate.cloud"
+LABEL maintainer="josukutty"
 {% for artifact in artifacts.APP_DIR %}
 COPY {{ artifact }} standalone/deployments
 {% endfor %}

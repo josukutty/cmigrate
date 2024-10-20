@@ -1,5 +1,5 @@
 FROM tomcat
-LABEL maintainer="xmigrate.cloud"
+LABEL maintainer="josukutty"
 {% for artifact in artifacts.APP_DIR %}
 COPY {{ artifact }} /usr/local/tomcat/webapps
 {% endfor %}
