@@ -1,5 +1,6 @@
 from glob import glob
 import os
+import psutil
 def tomcat_dependencies():
     artifact = {}
     for proc in psutil.process_iter():
