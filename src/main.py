@@ -36,5 +36,5 @@ def build_dockerfile(runtime):
 if __name__ == '__main__':
     runtime = discover_runtime()
     print(runtime)
-    build_dockerfile(runtime)
+    build_dockerfile(runtime[0])
 

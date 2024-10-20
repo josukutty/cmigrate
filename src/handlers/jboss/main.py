@@ -1,6 +1,7 @@
 
 
 def jboss_dependencies():
+    artifact = []
     artifact['APP_RUNTIME'] = "jboss"
     war_files = glob(proc.environ()['JBOSS_HOME'] + 'standalone/deployments/*.war')
     artifact['APP_DIR'] = war_files
