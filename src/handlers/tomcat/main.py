@@ -1,7 +1,7 @@
 
 
 def tomcat_dependencies():
-    artifact = []
+    artifact = {}
     artifact['APP_RUNTIME'] = "tomcat"
     war_files = glob(proc.environ()['CATALINA_BASE'] + '/webapps/*.war')
     artifact['APP_DIR'] = war_files
