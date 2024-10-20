@@ -12,8 +12,8 @@ from handlers.tomcat.main import tomcat_dependencies
 
 
 
-@click.command()
-@click.option('--runtime', default='empty', help='Application runtime, example: tomcat')
+#@click.command()
+#@click.option('--runtime', default='empty', help='Application runtime, example: tomcat')
 def build_dockerfile(runtime):
     artifacts = dict()
     # app_runtime = []
