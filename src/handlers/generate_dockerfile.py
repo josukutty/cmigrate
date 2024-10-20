@@ -1,5 +1,5 @@
 def generate_docker_file(artifacts):
-    templateLoader = jinja2.FileSystemLoader(searchpath="./templates")
+    templateLoader = jinja2.FileSystemLoader(searchpath="../templates")
     templateEnv = jinja2.Environment(loader=templateLoader)
     if artifacts['APP_RUNTIME'] == "tomcat":
         TEMPLATE_FILE = "Dockerfile-tomcat.j2"

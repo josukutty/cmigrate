@@ -19,18 +19,19 @@ def build_dockerfile(runtime):
     # app_runtime = []
     if runtime == 'jboss':
         artifacts = jboss_dependencies()
-    elif runtime == 'tomcat'::
+    elif runtime == 'tomcat':
         artifacts = tomcat_dependencies()
+    else:
+        print("Unidentified runtime")
+
+    
     if len(artifacts.keys()) > 0:
         print(artifacts)
         dockerfile = generate_docker_file(artifacts)
         with open('Dockerfile', 'w') as f:
             f.write(dockerfile)
         print(f"Generated Dockerfile")
-    elif len(app_runtime) > 1:
-        print(f'Found multiple application runtimes, pass one in --runtime parameter: {",".join(list(set(app_runtime)))}')
-    else:
-        print(f"Couldn't find any application running on this server")
+
 
 if __name__ == '__main__':
     runtime = discover_runtime()
