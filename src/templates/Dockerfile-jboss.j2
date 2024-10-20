@@ -1,8 +1,8 @@
 FROM registry.access.redhat.com/jboss-eap-7/eap71-openshift
 LABEL maintainer="xmigrate.cloud"
-{% for artefact in artefacts.APP_DIR %}
-COPY {{ artefact }} standalone/deployments
+{% for artifact in artifacts.APP_DIR %}
+COPY {{ artifact }} standalone/deployments
 {% endfor %}
-COPY {{ artefacts.APP_CONFIG }} /bin/standalone/configuration/standalone.xml
-EXPOSE {{ artefacts.APP_PORT }}
+COPY {{ artifacts.APP_CONFIG }} /bin/standalone/configuration/standalone.xml
+EXPOSE {{ artifacts.APP_PORT }}
 CMD ["standalone.sh", "run"]
